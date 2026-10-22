@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>KPI Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+<header class="topbar">
+    <h1>KPI Dashboard</h1>
+    <nav class="nav"><a href="/" class="current">KPI</a> <a href="/users">Users</a></nav>
+    <span class="subtitle">Sample data · latest month: Sep 2026</span>
+</header>
+
+<main>
+    <section class="cards">
+        {% macro fmt(v, unit) -%}
+            {%- if unit == "$" %}${% endif -%}
+            {{ "{:,.0f}".format(v) if v >= 100 else "{:.1f}".format(v) }}
+            {%- if unit == "%" %}%{% endif -%}
+        {%- endmacro %}
+        {% for card in cards %}
+        <article class="card status-{{ card.status }}">
+            <div class="card-name">{{ card.name }}</div>
+            <div class="card-value">{{ fmt(card.value, card.unit) }}</div>
+            <div class="card-meta">
+                Target {{ fmt(card.target, card.unit) }} · {{ "%.1f"|format(card.attainment) }}% of target
+            </div>
+            <div class="card-change {{ 'up' if card.is_good_change else 'down' }}">
+                {{ "%+.1f"|format(card.change_pct) }}% vs prior month
+            </div>
+        </article>
+        {% endfor %}
+    </section>
+
+    <section class="charts">
+        {% for chart in charts %}
+        <div class="panel">{{ chart | safe }}</div>
+        {% endfor %}
+    </section>
+</main>
+</body>
+</html>

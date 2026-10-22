@@ -1,0 +1,9 @@
+fastapi
+uvicorn[standard]
+jinja2
+plotly
+pandas
+
+# dev / test
+pytest
+httpx

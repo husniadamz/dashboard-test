@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>User Monitor</title>
+    <link rel="stylesheet" href="{{ url_for('static', path='style.css') }}">
+    <script src="https://cdn.plot.ly/plotly-2.35.2.min.js" charset="utf-8"></script>
+</head>
+<body>
+<header class="topbar">
+    <h1>User Monitor</h1>
+    <nav class="nav"><a href="/">KPI</a> <a href="/users" class="current">Users</a></nav>
+    <span class="subtitle">Sample data · as of {{ as_of }}</span>
+</header>
+
+<main>
+    <section class="cards">
+        {% for c in cards %}
+        <article class="card status-{{ c.tone }}">
+            <div class="card-name">{{ c.label }}</div>
+            <div class="card-value">{{ c.value }}</div>
+            <div class="card-meta">{{ c.note }}</div>
+        </article>
+        {% endfor %}
+    </section>
+
+    <section class="charts">
+        <div class="panel">{{ charts[0] | safe }}</div>
+        <div class="panel">{{ charts[1] | safe }}</div>
+        <div class="panel">{{ charts[2] | safe }}</div>
+    </section>
+
+    <section class="panel table-panel">
+        <h2>Active sessions</h2>
+        <table>
+            <thead><tr><th>User</th><th>IP address</th><th>Client</th><th>Last activity</th><th>Status</th></tr></thead>
+            <tbody>
+            {% for s in sessions %}
+            <tr>
+                <td>{{ s.name }}</td>
+                <td>{{ s.ip_address }}</td>
+                <td>{{ s.user_agent }}</td>
+                <td>{{ s.last_activity }}</td>
+                <td><span class="pill {{ 'pill-ok' if s.is_active else 'pill-muted' }}">{{ 'active' if s.is_active else 'idle' }}</span></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+
+    <section class="panel table-panel">
+        <h2>Users</h2>
+        <table>
+            <thead><tr><th>Name</th><th>Email</th><th>Group</th><th>Provider</th><th>Last login</th><th>2FA</th><th>Reset required</th><th>Status</th></tr></thead>
+            <tbody>
+            {% for u in users %}
+            <tr>
+                <td>{{ u.name }}</td>
+                <td>{{ u.email }}</td>
+                <td>{{ u.group_code }}</td>
+                <td>{{ u.provider_id }}</td>
+                <td>{{ u.last_login_at }}</td>
+                <td>{{ 'on' if u.two_factor_enabled else 'off' }}</td>
+                <td>{{ 'yes' if u.force_password_reset else 'no' }}</td>
+                <td><span class="pill pill-{{ u.status }}">{{ u.status }}</span></td>
+            </tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </section>
+</main>
+</body>
+</html>
