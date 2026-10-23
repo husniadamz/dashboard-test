@@ -3,6 +3,8 @@ uvicorn[standard]
 jinja2
 plotly
 pandas
+sqlalchemy
+pymysql
 
 # dev / test
 pytest

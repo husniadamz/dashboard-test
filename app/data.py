@@ -1,8 +1,8 @@
 """KPI data provider.
 
-Currently serves deterministic sample data so the dashboard works without a
-database. When a database is added, replace the body of `load_monthly_metrics`
-and `load_region_metrics` (keep the return shapes) and nothing else changes.
+Reads PACED KPIs from the sample database (`PACED_SAMPLE_DB_NAME`, default
+`paced_dashboard`; see `app/seed.py` to create and fill it with sample data).
+The `make_*` functions produce that sample data.
 """
 
 from __future__ import annotations
@@ -10,6 +10,8 @@ from __future__ import annotations
 from dataclasses import dataclass
 
 import pandas as pd
+
+from app.db import read_sql, sample_database_name
 
 REGIONS = ["North", "South", "East", "West", "Central"]
 
@@ -51,8 +53,8 @@ class KpiCard:
         return "off-track"
 
 
-def load_monthly_metrics() -> pd.DataFrame:
-    """One row per month for the last 12 months."""
+def make_monthly_metrics() -> pd.DataFrame:
+    """Sample data: one row per month for the last 12 months."""
     months = pd.period_range(end=pd.Timestamp("2026-09-01"), periods=12, freq="M")
     idx = range(len(months))
     return pd.DataFrame(
@@ -67,11 +69,34 @@ def load_monthly_metrics() -> pd.DataFrame:
     )
 
 
-def load_region_metrics() -> pd.DataFrame:
-    """Latest-month revenue and target per region (regions sum to the latest month's revenue)."""
+def make_region_metrics() -> pd.DataFrame:
+    """Sample data: latest-month revenue and target per region (regions sum to the latest month's revenue)."""
     revenue = [62_000, 41_500, 47_000, 24_000, 25_000]
     target = [60_000, 45_000, 48_000, 26_000, 27_000]
     return pd.DataFrame({"region": REGIONS, "revenue": revenue, "target": target})
+
+
+def load_monthly_metrics() -> pd.DataFrame:
+    """One row per month for the last 12 months, read from kpi_monthly_metrics."""
+    df = read_sql(
+        "SELECT month, revenue, orders, new_customers, churn_rate, nps "
+        "FROM kpi_monthly_metrics ORDER BY month",
+        database=sample_database_name(),
+    )
+    for col in ["revenue", "orders", "new_customers", "churn_rate", "nps"]:
+        df[col] = df[col].astype(float)
+    return df
+
+
+def load_region_metrics() -> pd.DataFrame:
+    """Latest-month revenue and target per region, read from kpi_region_metrics."""
+    df = read_sql(
+        "SELECT region, revenue, target FROM kpi_region_metrics ORDER BY region",
+        database=sample_database_name(),
+    )
+    df["revenue"] = df["revenue"].astype(float)
+    df["target"] = df["target"].astype(float)
+    return df
 
 
 def get_kpi_cards() -> list[KpiCard]:

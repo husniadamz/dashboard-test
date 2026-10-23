@@ -10,8 +10,8 @@
 <body>
 <header class="topbar">
     <h1>User Monitor</h1>
-    <nav class="nav"><a href="/">KPI</a> <a href="/users" class="current">Users</a></nav>
-    <span class="subtitle">Sample data · as of {{ as_of }}</span>
+    <nav class="nav"><a href="/">PACED</a> <a href="/users" class="current">Users</a></nav>
+    <span class="subtitle">Live data · casemix · as of {{ as_of }}</span>
 </header>
 
 <main>
@@ -32,24 +32,6 @@
     </section>
 
     <section class="panel table-panel">
-        <h2>Active sessions</h2>
-        <table>
-            <thead><tr><th>User</th><th>IP address</th><th>Client</th><th>Last activity</th><th>Status</th></tr></thead>
-            <tbody>
-            {% for s in sessions %}
-            <tr>
-                <td>{{ s.name }}</td>
-                <td>{{ s.ip_address }}</td>
-                <td>{{ s.user_agent }}</td>
-                <td>{{ s.last_activity }}</td>
-                <td><span class="pill {{ 'pill-ok' if s.is_active else 'pill-muted' }}">{{ 'active' if s.is_active else 'idle' }}</span></td>
-            </tr>
-            {% endfor %}
-            </tbody>
-        </table>
-    </section>
-
-    <section class="panel table-panel">
         <h2>Users</h2>
         <table>
             <thead><tr><th>Name</th><th>Email</th><th>Group</th><th>Provider</th><th>Last login</th><th>2FA</th><th>Reset required</th><th>Status</th></tr></thead>
@@ -60,7 +42,7 @@
                 <td>{{ u.email }}</td>
                 <td>{{ u.group_code }}</td>
                 <td>{{ u.provider_id }}</td>
-                <td>{{ u.last_login_at }}</td>
+                <td>{{ u.last_login_label }}</td>
                 <td>{{ 'on' if u.two_factor_enabled else 'off' }}</td>
                 <td>{{ 'yes' if u.force_password_reset else 'no' }}</td>
                 <td><span class="pill pill-{{ u.status }}">{{ u.status }}</span></td>

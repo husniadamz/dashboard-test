@@ -23,7 +23,7 @@ def revenue_trend_chart() -> str:
             y=df["revenue"],
             mode="lines+markers",
             name="Revenue",
-            line={"color": "#2563eb", "width": 3},
+            line={"color": "#7c3aed", "width": 3},
         )
     )
     fig.update_layout(
@@ -39,9 +39,9 @@ def revenue_trend_chart() -> str:
 def orders_and_customers_chart() -> str:
     df = load_monthly_metrics()
     fig = make_subplots(specs=[[{"secondary_y": True}]])
-    fig.add_trace(go.Bar(x=df["month"], y=df["orders"], name="Orders", marker_color="#93c5fd"), secondary_y=False)
+    fig.add_trace(go.Bar(x=df["month"], y=df["orders"], name="Orders", marker_color="#f0abfc"), secondary_y=False)
     fig.add_trace(
-        go.Scatter(x=df["month"], y=df["new_customers"], name="New customers", mode="lines+markers", line={"color": "#16a34a"}),
+        go.Scatter(x=df["month"], y=df["new_customers"], name="New customers", mode="lines+markers", line={"color": "#ec4899"}),
         secondary_y=True,
     )
     fig.update_layout(
@@ -60,11 +60,11 @@ def churn_nps_chart() -> str:
     df = load_monthly_metrics()
     fig = make_subplots(specs=[[{"secondary_y": True}]])
     fig.add_trace(
-        go.Scatter(x=df["month"], y=df["churn_rate"], name="Churn rate (%)", mode="lines+markers", line={"color": "#dc2626"}),
+        go.Scatter(x=df["month"], y=df["churn_rate"], name="Churn rate (%)", mode="lines+markers", line={"color": "#e11d48"}),
         secondary_y=False,
     )
     fig.add_trace(
-        go.Scatter(x=df["month"], y=df["nps"], name="NPS", mode="lines+markers", line={"color": "#7c3aed"}),
+        go.Scatter(x=df["month"], y=df["nps"], name="NPS", mode="lines+markers", line={"color": "#c026d3"}),
         secondary_y=True,
     )
     fig.update_layout(

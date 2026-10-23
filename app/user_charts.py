@@ -2,10 +2,10 @@
 
 from __future__ import annotations
 
+import pandas as pd
 import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
-from app.user_data import load_hourly_activity, load_users
+from app.user_data import load_users
 
 PLOT_TEMPLATE = "plotly_white"
 STATUS_COLORS = {"active": "#16a34a", "dormant": "#f59e0b", "inactive": "#94a3b8"}
@@ -15,22 +15,22 @@ def _html(fig: go.Figure) -> str:
     return fig.to_html(full_html=False, include_plotlyjs=False, config={"displaylogo": False})
 
 
-def hourly_activity_chart() -> str:
-    df = load_hourly_activity()
-    fig = make_subplots(specs=[[{"secondary_y": True}]])
-    fig.add_trace(go.Bar(x=df["hour"], y=df["api_requests"], name="API requests", marker_color="#93c5fd"), secondary_y=False)
-    fig.add_trace(go.Scatter(x=df["hour"], y=df["logins"], name="Logins", mode="lines+markers", line={"color": "#2563eb"}), secondary_y=True)
-    fig.add_trace(go.Scatter(x=df["hour"], y=df["model_changes"], name="Record changes", mode="lines", line={"color": "#7c3aed"}), secondary_y=True)
-    fig.add_trace(go.Scatter(x=df["hour"], y=df["api_errors"], name="API errors", mode="lines+markers", line={"color": "#dc2626"}), secondary_y=True)
+def login_activity_chart() -> str:
+    """Users per day by their most recent login, for the last 14 days."""
+    users = load_users()
+    today = pd.Timestamp.now().normalize()
+    days = pd.date_range(today - pd.Timedelta(days=13), today, freq="D")
+    last = users["last_login_at"].dropna()
+    per_day = last[last >= days[0]].dt.normalize().value_counts()
+    counts = per_day.reindex(days, fill_value=0)
+    fig = go.Figure(go.Bar(x=days, y=counts.values, name="Users", marker_color="#7c3aed"))
     fig.update_layout(
-        title="Activity, last 24 hours",
+        title="Latest login per user, last 14 days",
         template=PLOT_TEMPLATE,
-        legend={"orientation": "h", "y": -0.2},
-        margin={"l": 60, "r": 60, "t": 50, "b": 60},
+        margin={"l": 60, "r": 20, "t": 50, "b": 60},
         height=360,
     )
-    fig.update_yaxes(title_text="API requests", secondary_y=False)
-    fig.update_yaxes(title_text="Logins / changes / errors", secondary_y=True)
+    fig.update_yaxes(title_text="Users")
     return _html(fig)
 
 

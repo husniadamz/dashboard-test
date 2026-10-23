@@ -3,7 +3,7 @@ import pandas as pd
 
 from app.data import get_kpi_cards, load_monthly_metrics, load_region_metrics
 from app.main import app
-from app.user_data import NOW, get_user_monitor_summary, load_sessions, load_users
+from app.user_data import get_user_monitor_summary, load_users
 
 client = TestClient(app)
 
@@ -58,7 +58,8 @@ def test_dashboard_page_renders_cards_and_charts():
     response = client.get("/")
     assert response.status_code == 200
     html = response.text
-    assert "KPI Dashboard" in html
+    assert "PACED" in html
+    assert "Price, Admission &amp; Clinical Electronic Datahub" in html
     assert html.count('class="card ') == 5
     assert html.count('class="panel"') == 4
     assert "plotly-graph-div" in html
@@ -72,17 +73,17 @@ def test_user_status_counts_are_consistent():
     assert summary.active_users_7d + summary.dormant_users + summary.inactive_users == summary.total_users
 
 
-def test_active_sessions_are_within_window():
-    sessions = load_sessions()
-    active = sessions[sessions["is_active"]]
-    assert (NOW - active["last_activity"] <= pd.Timedelta(minutes=30)).all()
+def test_users_come_from_casemix_without_secrets():
+    users = load_users()
+    assert not {"password", "remember_token"} & set(users.columns)
+    assert len(users) > 0
 
 
 def test_api_users_summary():
     body = client.get("/api/users/summary").json()
-    assert body["total_users"] == 15
+    assert body["total_users"] == len(load_users())
     assert 0 <= body["twofa_enabled_pct"] <= 100
-    assert 0 <= body["api_error_rate_24h"] <= 100
+    assert "active_sessions" not in body
 
 
 def test_users_page_renders():
@@ -90,6 +91,7 @@ def test_users_page_renders():
     assert response.status_code == 200
     html = response.text
     assert "User Monitor" in html
-    assert html.count('class="card ') == 6
+    assert html.count('class="card ') == 4
     assert html.count("plotly-graph-div") == 3
-    assert "Active sessions" in html
+    assert "Live data · casemix" in html
+    assert "Sample data" not in html
